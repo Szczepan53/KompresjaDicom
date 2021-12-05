@@ -9,7 +9,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 public class Main {
-    private static String dicomFile = "C:\\Users\\Admin\\IdeaProjects\\PixelmedTest\\0015.DCM";
+    private static String dicomFile = "C:dicom_files\\D0001.dcm";
     private static BufferedImage image = null;
 
     public static void main(String[] args) {

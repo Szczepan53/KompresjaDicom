@@ -14,9 +14,10 @@ import java.io.File;
 import java.io.IOException;
 
 public class Compressor {
-    private static String dicomFile = "C:\\Users\\Admin\\IdeaProjects\\PixelmedTest\\0015.DCM";
+    private static String dicomFile = "C:dicom_files\\D0001.DCM";
     private static String outputJpgFile = "0015compressedJPG.jpg";
     private static String outputPngFile = "0015compressedPNG.png";
+
 
 
     public static void main(String[] args) {
@@ -72,6 +73,7 @@ public class Compressor {
         jpegWriteParam.setCompressionQuality(compressionQuality);
 
         write2Image(bufferedImage, destJPGFilePath, jpegWriter, jpegWriteParam);
+
 
     }
 
