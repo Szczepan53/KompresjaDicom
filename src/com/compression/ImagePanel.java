@@ -11,8 +11,8 @@ public class ImagePanel extends JPanel {
     public ImagePanel() {
 
         this.imageLabel = new JLabel();
-        this.setLayout(new BorderLayout());
-        this.add(imageLabel, BorderLayout.CENTER);
+        this.setLayout(new GridBagLayout());
+        this.add(imageLabel);
     }
 
     public BufferedImage getImage() {
