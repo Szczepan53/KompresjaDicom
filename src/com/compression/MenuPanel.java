@@ -9,21 +9,24 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EventObject;
 
 public class MenuPanel extends JPanel implements ActionListener{
     private JComboBox<CompressionType> compressionTypeCombo;
     private JButton compressButton;
-    private ArrayList<MenuPanelListener> menuPanelListeners;
+    private MenuPanelListener menuPanelListener;
+    private static ArrayList<String> compressionTypes = new ArrayList<>(Arrays.asList("jpg", "png"));
     JButton button;
     public String file;
+
+
     public MenuPanel(){
         Dimension dim = this.getPreferredSize();
         dim.width = 250;
         this.setPreferredSize(dim);
         this.compressionTypeCombo = new JComboBox<>();
         this.compressButton = new JButton("Compress image");
-        this.menuPanelListeners = new ArrayList<>();
 
         button = new JButton("Select File");
         button.addActionListener(this);
@@ -38,10 +41,10 @@ public class MenuPanel extends JPanel implements ActionListener{
         this.compressButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                menuPanelListeners.get(compressionTypeCombo.getSelectedIndex()).menuEventHandler(); //do zmiany zeby obsługiwała wybrany obraz a nie hard-coded
+                MenuEvent ev = new MenuEvent(e, compressionTypes.get(compressionTypeCombo.getSelectedIndex()), 100);
+                menuPanelListener.menuEventHandler(ev); //do zmiany zeby obsługiwała wybrany obraz a nie hard-coded
             }
         });
-
         Border outerBorder = BorderFactory.createEmptyBorder(5, 5, 5, 5);
         Border innerBorder = BorderFactory.createTitledBorder("Menu");
         this.setBorder(BorderFactory.createCompoundBorder(outerBorder, innerBorder));
@@ -78,8 +81,8 @@ public class MenuPanel extends JPanel implements ActionListener{
         this.add(this.compressButton, gc);
     }
 
-    public void addMenuPanelListener(MenuPanelListener menuPanelListener) {
-        this.menuPanelListeners.add(menuPanelListener);
+    public void setMenuPanelListener(MenuPanelListener menuPanelListener) {
+        this.menuPanelListener = menuPanelListener;
     }
 
     class CompressionType {
