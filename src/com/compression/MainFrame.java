@@ -1,6 +1,8 @@
 package com.compression;
 
 import com.pixelmed.dicom.DicomException;
+import com.pixelmed.display.SingleImagePanel;
+import com.pixelmed.display.SourceImage;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,64 +15,38 @@ public class MainFrame extends JFrame {
 //    private Toolbar toolbar;
     private ImagePanel imagePanel;
     private MenuPanel menuPanel;
-    private static String outputJpgFile = "0015compressedJPG.jpg";
-    private static String outputPngFile = "0015compressedPNG.png";
+    private String dicomFilePath;
+    private String outputJpgFilePath;
+    private  String outputPngFilePath;
 
-    public MainFrame(String title) {
+    public MainFrame(String title, SourceImage srcImage, String dicomFilePath) {
         super(title);
-
-//        this.toolbar = new Toolbar();
-        this.imagePanel = new ImagePanel();
+        this.dicomFilePath = dicomFilePath;
+        this.outputJpgFilePath = makeCompressedFilePath(dicomFilePath, "jpg");
+        this.outputPngFilePath = makeCompressedFilePath(dicomFilePath, "png");
+        this.imagePanel = new ImagePanel(srcImage);
         this.menuPanel = new MenuPanel();
+
+        makeCompressedFilePath(dicomFilePath, "jpg");
+        makeCompressedFilePath(dicomFilePath, "png");
 
         this.setLayout(new BorderLayout());
         this.setSize(new Dimension(600, 500));
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         this.add(this.imagePanel, BorderLayout.CENTER);
-//        this.add(this.toolbar, BorderLayout.SOUTH);
         this.add(this.menuPanel, BorderLayout.WEST);
-//
-//        this.toolbar.addCompressionListener(new CompressionListener() {
-//            @Override
-//            public void compress() {
-//
-//            }
-//        });
-//
-//        this.toolbar.addCompressionListener(new CompressionListener() {
-//            @Override
-//            public void compress() {
-//
-//            }
-//        });
 
-        this.imagePanel.addComponentListener(new ComponentAdapter() {
+        this.menuPanel.setMenuPanelListener(new MenuPanelListener() {
             @Override
-            public void componentResized(ComponentEvent e) {
-                imagePanel.resizeImage(e.getComponent().getSize());
-            }
-        });
-
-        this.menuPanel.addMenuPanelListener(new MenuPanelListener() {
-            @Override
-            public void menuEventHandler() {
+            public void menuEventHandler(MenuEvent ev) {
                 try {
-                    Compressor.compressDCM2JPEG(imagePanel.getImage(), outputJpgFile, 0.1f);
+                    String compressionType = ev.getCompressionType();
+                    int compressionQuality = ev.getCompressionQuality();
+                    String outputFilePath = compressionType.equals("jpg")? outputJpgFilePath : outputPngFilePath;
+                    Compressor.compressImage(dicomFilePath, outputFilePath, compressionType, compressionQuality);
                 }
-                catch (IOException ex) {
-                    ex.printStackTrace();
-                }
-            }
-        });
-
-        this.menuPanel.addMenuPanelListener(new MenuPanelListener() {
-            @Override
-            public void menuEventHandler() {
-                try {
-                    Compressor.compressDCM2PNG(imagePanel.getImage(), outputPngFile);
-                }
-                catch (IOException ex) {
+                catch (IOException | DicomException ex) {
                     ex.printStackTrace();
                 }
             }
@@ -80,7 +56,19 @@ public class MainFrame extends JFrame {
 
     }
 
-    public void setImagePanelImage(BufferedImage image) {
-        this.imagePanel.setImage(image);
+//    public void setImagePanelImage(BufferedImage image) {
+//        this.imagePanel.setImage(image);
+//    }
+
+    public static String makeCompressedFilePath(String filePath, String destFormat) {
+        String[] partPath = filePath.split("\\\\");
+        partPath[partPath.length-2] += "\\outputs";
+        String[] lastPart = partPath[partPath.length-1].split("\\.");
+        lastPart[1] = destFormat;
+        String changedFormatLastPart = String.join(".", lastPart);
+        partPath[partPath.length-1] = changedFormatLastPart;
+        String newPath = String.join("\\", partPath);
+        System.out.println(newPath);
+        return newPath;
     }
 }

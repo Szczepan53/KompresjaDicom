@@ -1,5 +1,5 @@
 package com.compression;
 
 public interface MenuPanelListener {
-    void menuEventHandler();
+    void menuEventHandler(MenuEvent ev);
 }

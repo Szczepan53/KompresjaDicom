@@ -7,12 +7,15 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.EventObject;
 
 public class MenuPanel extends JPanel {
     private JComboBox<CompressionType> compressionTypeCombo;
     private JButton compressButton;
-    private ArrayList<MenuPanelListener> menuPanelListeners;
+    private MenuPanelListener menuPanelListener;
+    private static ArrayList<String> compressionTypes = new ArrayList<>(Arrays.asList("jpg", "png"));
 
     public MenuPanel(){
         Dimension dim = this.getPreferredSize();
@@ -20,7 +23,6 @@ public class MenuPanel extends JPanel {
         this.setPreferredSize(dim);
         this.compressionTypeCombo = new JComboBox<>();
         this.compressButton = new JButton("Compress image");
-        this.menuPanelListeners = new ArrayList<>();
 
         DefaultComboBoxModel<CompressionType> compressionTypeComboModel = new DefaultComboBoxModel<>();
         compressionTypeComboModel.addElement(new CompressionType(0, "JPEG"));
@@ -30,7 +32,8 @@ public class MenuPanel extends JPanel {
         this.compressButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                menuPanelListeners.get(compressionTypeCombo.getSelectedIndex()).menuEventHandler(); //do zmiany zeby obsługiwała wybrany obraz a nie hard-coded
+                MenuEvent ev = new MenuEvent(e, compressionTypes.get(compressionTypeCombo.getSelectedIndex()), 100);
+                menuPanelListener.menuEventHandler(ev); //do zmiany zeby obsługiwała wybrany obraz a nie hard-coded
             }
         });
 
@@ -69,11 +72,11 @@ public class MenuPanel extends JPanel {
         this.add(this.compressButton, gc);
     }
 
-    public void addMenuPanelListener(MenuPanelListener menuPanelListener) {
-        this.menuPanelListeners.add(menuPanelListener);
+    public void setMenuPanelListener(MenuPanelListener menuPanelListener) {
+        this.menuPanelListener = menuPanelListener;
     }
 
-    class CompressionType {
+    static class CompressionType {
         private int id;
         private String text;
 

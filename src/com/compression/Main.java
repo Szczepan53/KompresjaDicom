@@ -1,20 +1,24 @@
 package com.compression;
 
 import com.pixelmed.dicom.AttributeList;
+import com.pixelmed.dicom.AttributeTag;
 import com.pixelmed.dicom.DicomException;
+import com.pixelmed.dicom.TagFromName;
 import com.pixelmed.display.SourceImage;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 public class Main {
-    private static String dicomFile = "C:\\Users\\Admin\\IdeaProjects\\PixelmedTest\\0015.DCM";
+    private static String dicomFile = "C:\\Users\\Admin\\IdeaProjects\\PJAVA_KompresjaDicom\\dicom_files\\MRBRAIN.DCM";
     private static BufferedImage image = null;
+    private static SourceImage srcImage;
 
     public static void main(String[] args) {
         try {
-            image = (new SourceImage(dicomFile)).getBufferedImage();
+            srcImage = new SourceImage(dicomFile);
         }
         catch (IOException | DicomException ex) {
             System.out.println("ERROR loading DICOM file...");
@@ -26,8 +30,7 @@ public class Main {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                MainFrame mainFrame = new MainFrame("DICOM Image Compression App");
-                mainFrame.setImagePanelImage(image);
+                MainFrame mainFrame = new MainFrame("DICOM Image Compression App", srcImage, dicomFile);
             }
         });
     }

@@ -2,6 +2,8 @@ package com.compression;
 
 import com.pixelmed.dicom.AttributeList;
 import com.pixelmed.dicom.DicomException;
+import com.pixelmed.dicom.TagFromName;
+import com.pixelmed.display.ConsumerFormatImageMaker;
 import com.pixelmed.display.SourceImage;
 
 import javax.imageio.IIOImage;
@@ -10,25 +12,87 @@ import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
 import javax.imageio.stream.ImageOutputStream;
 import java.awt.image.BufferedImage;
+import java.awt.image.BufferedImageOp;
+import java.awt.image.Raster;
+import java.awt.image.RescaleOp;
 import java.io.File;
 import java.io.IOException;
 
 public class Compressor {
-    private static String dicomFile = "C:\\Users\\Admin\\IdeaProjects\\PixelmedTest\\0015.DCM";
-    private static String outputJpgFile = "0015compressedJPG.jpg";
-    private static String outputPngFile = "0015compressedPNG.png";
-
+    private static String dicomFile = "C:\\Users\\Admin\\IdeaProjects\\PJAVA_KompresjaDicom\\dicom_files\\D0001.dcm";
+    private static String outputJpgFile = "D0001JPG.jpg";
+    private static String outputPngFile = "D0001PNG.png";
+    public static final String JPG = "jpg";
+    public static final String PNG = "png";
 
     public static void main(String[] args) {
-        AttributeList attrList = new AttributeList();
         try {
-            compressDCM2JPEG(dicomFile, outputJpgFile, 0.05f);
-            compressDCM2PNG(dicomFile, outputPngFile);
+            AttributeList attributeList = new AttributeList();
+            attributeList.read(dicomFile);
+            ConsumerFormatImageMaker.convertFileToEightBitImage(dicomFile,outputJpgFile,"jpg",0,0,0,0,1,ConsumerFormatImageMaker.ALL_ANNOTATIONS);
         }
         catch (Exception e) {
             e.printStackTrace();
         }
     }
+
+
+    /* robi całą robote */
+    public static void compressImage(String dicomFilePath, String outputFilePath, String outputFormat, int imageQuality) throws IOException, DicomException {
+        ConsumerFormatImageMaker.convertFileToEightBitImage(dicomFilePath, outputFilePath,outputFormat,0,0,0,0,imageQuality, ConsumerFormatImageMaker.NO_ANNOTATIONS);
+    }
+
+//    public static BufferedImage get8BitImage(AttributeList attrList) throws DicomException {
+//        int pixelsAllocated = attrList.get(TagFromName.BitsAllocated).getSingleIntegerValueOrDefault(0);
+//        BufferedImage containedImage = (new SourceImage(attrList)).getBufferedImage();
+//
+//        if(pixelsAllocated == 8) {
+//            return containedImage;
+//        }
+//
+//        Raster raster = containedImage.getData();
+//        int imgWidth = containedImage.getWidth();
+//        int imgHeight = containedImage.getHeight();
+//        int minPixelValue = Integer.MAX_VALUE;
+//        int maxPixelValue = Integer.MIN_VALUE;
+//        for(int y=0; y < imgHeight; y++) {
+//            for(int x=0; x<imgWidth; x++) {
+//                int curPixelValue = raster.getSample(x, y, 0);
+//                if(curPixelValue < minPixelValue) {
+//                    minPixelValue = curPixelValue;
+//                }
+//                else if(curPixelValue > maxPixelValue) {
+//                    maxPixelValue = curPixelValue;
+//                }
+//            }
+//        }
+//        System.out.println("minPixelValue = " + minPixelValue);
+//        System.out.println("maxPixelValue = " + maxPixelValue);
+//        int oldRange = maxPixelValue - minPixelValue;
+//        int newRange = Short.MAX_VALUE - Short.MIN_VALUE;
+//        float scale = ((float) newRange)/oldRange;
+//        float offset = Short.MIN_VALUE - (minPixelValue * ((float)newRange) / oldRange);
+//
+//        System.out.println("New min: " + (minPixelValue * scale + offset));
+//        System.out.println("New max: " + (maxPixelValue * scale + offset));
+//        RescaleOp rescaleOp = new RescaleOp(scale, offset, null);
+//        containedImage = rescaleOp.filter(containedImage, null);
+////        BufferedImage newImage = new BufferedImage(imgWidth, imgHeight, BufferedImage.TYPE_BYTE_GRAY);
+////        for(int y=0; y < imgHeight; y++) {
+////            for(int x=0; x<imgWidth; x++) {
+////                int argb = containedImage.getRGB(x, y);
+////                int r = (argb >> 16) & 0xff;
+////                int g = (argb >> 8) & 0xff;
+////                int b = argb & 0xff;
+////                System.out.printf("%d %d %d\n", r, g, b);
+////                r += 100;
+////                g += 100;
+////                b += 100;
+////                argb = (r << 16) | (g << 8) | b;
+////            }
+////        }
+//        return containedImage;
+//    }
 
     /*
     BufferedImage image - dane obrazowe załadowane z pliku DICOM
