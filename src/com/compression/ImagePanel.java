@@ -5,10 +5,14 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 
 public class ImagePanel extends JPanel {
-    private BufferedImage image = null;
+    private final JLabel imageLabel;
+    private BufferedImage image;
 
     public ImagePanel() {
-        super();
+
+        this.imageLabel = new JLabel();
+        this.setLayout(new BorderLayout());
+        this.add(imageLabel, BorderLayout.CENTER);
     }
 
     public BufferedImage getImage() {
@@ -16,20 +20,27 @@ public class ImagePanel extends JPanel {
     }
 
     public void setImage(BufferedImage image) {
-        if(image != null) {
-            this.image = image;
-            this.setPreferredSize(new Dimension(image.getWidth(), image.getHeight()));
-            this.repaint();
-        }
+        this.image = image;
+        this.imageLabel.setIcon(new ImageIcon(this.image));
     }
 
-    @Override
-    public void paintComponent(Graphics g) {
-        Graphics2D g2d = (Graphics2D) g;
-        super.paintComponent(g);
+    public void resizeImage(Dimension dim) {
+        if(image != null) {
+            int resizedWidth = dim.width;
+            int resizedHeight = dim.height;
 
-        if(this.image != null) {
-            g2d.drawImage(this.image, null, 0, 0);
+            if(dim.height > dim.width) {
+                double height2WidthRatio = ((double)this.image.getHeight()) / this.image.getWidth();
+                resizedHeight = (int) (dim.width * height2WidthRatio);
+            }
+            else if(dim.height < dim.width) {
+                double width2HeightRatio = ((double)this.image.getWidth()) / this.image.getHeight();
+                resizedWidth = (int) (dim.height * width2HeightRatio);
+            }
+
+            ImageIcon currentIcon = new ImageIcon(this.image);
+            Image resizedImage = currentIcon.getImage().getScaledInstance(resizedWidth,resizedHeight,Image.SCALE_SMOOTH);
+            this.imageLabel.setIcon(new ImageIcon(resizedImage));
         }
     }
 }
