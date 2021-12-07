@@ -16,6 +16,7 @@ public class MenuPanel extends JPanel implements ActionListener{
     private JComboBox<CompressionType> compressionTypeCombo;
     private JButton compressButton;
     private MenuPanelListener menuPanelListener;
+    private MenuPanelListener fileChooserListener;
     private static ArrayList<String> compressionTypes = new ArrayList<>(Arrays.asList("jpg", "png"));
     JButton button;
     public String file;
@@ -112,9 +113,15 @@ public class MenuPanel extends JPanel implements ActionListener{
             int response = fileChooser.showOpenDialog(null);
             if(response == JFileChooser.APPROVE_OPTION){
                 File path = new File(fileChooser.getSelectedFile().getAbsolutePath());
-                file = path.getAbsolutePath();
+                String selectedFilePath = path.getAbsolutePath();
+                MenuEvent ev = new MenuEvent(e, selectedFilePath);
+                fileChooserListener.menuEventHandler(ev);
             }
         }
 
+    }
+
+    public void setFileChooserListener(MenuPanelListener fileChooserListener) {
+        this.fileChooserListener = fileChooserListener;
     }
 }

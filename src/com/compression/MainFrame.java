@@ -30,7 +30,6 @@ public class MainFrame extends JFrame {
         this.add(this.imagePanel, BorderLayout.CENTER);
         this.add(this.menuPanel, BorderLayout.WEST);
 
-
          this.menuPanel.setMenuPanelListener(new MenuPanelListener() {
             @Override
             public void menuEventHandler(MenuEvent ev) {
@@ -38,7 +37,7 @@ public class MainFrame extends JFrame {
                     String compressionType = ev.getCompressionType();
                     int compressionQuality = ev.getCompressionQuality();
                     String outputFilePath = compressionType.equals("jpg")? outputJpgFilePath : outputPngFilePath;
-                    Compressor.compressImage(dicomFilePath, outputFilePath, compressionType, compressionQuality);
+                    Compressor.compressImage(MainFrame.this.dicomFilePath, outputFilePath, compressionType, compressionQuality);
                 }
                 catch (IOException | DicomException ex) {
                     ex.printStackTrace();
@@ -46,6 +45,23 @@ public class MainFrame extends JFrame {
 //                NewWindow myWindow = new NewWindow(outputJpgFilePath, imagePanel.getImage());
             }
         });
+
+        this.menuPanel.setFileChooserListener(new MenuPanelListener() {
+            @Override
+            public void menuEventHandler(MenuEvent ev) {
+                try {
+                    String selectedFilePath = ev.getSelectedFilePath();
+                    setDicomFilePath(selectedFilePath);
+                    setOutputJpgFilePath(makeCompressedFilePath(selectedFilePath, "jpg"));
+                    setOutputPngFilePath(makeCompressedFilePath(selectedFilePath, "png"));
+                    setImagePanel(selectedFilePath);
+                }
+                catch (IOException | DicomException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
 
         this.setVisible(true);
 
@@ -55,7 +71,7 @@ public class MainFrame extends JFrame {
 //        this.imagePanel.setImage(image);
 //    }
 
-    public static String makeCompressedFilePath(String filePath, String destFormat) {
+    private static String makeCompressedFilePath(String filePath, String destFormat) {
         String[] partPath = filePath.split("\\\\");
         partPath[partPath.length-2] += "\\outputs";
         String[] lastPart = partPath[partPath.length-1].split("\\.");
@@ -65,5 +81,25 @@ public class MainFrame extends JFrame {
         String newPath = String.join("\\", partPath);
         System.out.println(newPath);
         return newPath;
+    }
+
+    private void setDicomFilePath(String dicomFilePath) {
+        this.dicomFilePath = dicomFilePath;
+    }
+
+    private void setImagePanel(String newDicomFilePath) throws IOException, DicomException{
+        this.remove(this.imagePanel);
+        this.imagePanel = new ImagePanel(new SourceImage(newDicomFilePath));
+        this.add(imagePanel, BorderLayout.CENTER);
+        this.revalidate();
+//        this.repaint();
+    }
+
+    private void setOutputJpgFilePath(String outputJpgFilePath) {
+        this.outputJpgFilePath = outputJpgFilePath;
+    }
+
+    private void setOutputPngFilePath(String outputPngFilePath) {
+        this.outputPngFilePath = outputPngFilePath;
     }
 }

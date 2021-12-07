@@ -19,7 +19,7 @@ public class ImagePanel extends SingleImagePanel {
         return this.image;
     }
 
-    public void setImage(BufferedImage image) {
+    public void setImage(String dicomFilePath) {
         this.image = image;
     }
 
