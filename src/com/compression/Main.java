@@ -12,7 +12,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 public class Main {
-    private static String dicomFile = "C:\\Users\\Admin\\IdeaProjects\\PJAVA_KompresjaDicom\\dicom_files\\MRBRAIN.DCM";
+    private static String dicomFile = "dicom_files\\MRBRAIN.DCM";
     private static BufferedImage image = null;
     private static SourceImage srcImage;
 

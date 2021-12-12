@@ -19,11 +19,12 @@ import java.io.File;
 import java.io.IOException;
 
 public class Compressor {
-    private static String dicomFile = "C:\\Users\\Admin\\IdeaProjects\\PJAVA_KompresjaDicom\\dicom_files\\D0001.dcm";
+    private static String dicomFile = "dicom_files\\D0001.dcm";
     private static String outputJpgFile = "D0001JPG.jpg";
     private static String outputPngFile = "D0001PNG.png";
     public static final String JPG = "jpg";
     public static final String PNG = "png";
+    private static String  destinationPath;
 
     public static void main(String[] args) {
         try {
@@ -109,6 +110,7 @@ public class Compressor {
         }
         imageWriter.dispose();
         System.out.println("Compressed image saved to " + destPath);
+        destinationPath = destPath;
     }
 
 
@@ -157,5 +159,7 @@ public class Compressor {
 
         write2Image(bufferedImage, destPNGFilePath, pngWriter, pngWriteParam);
     }
+    public String getDestinationPath(){ return destinationPath; }
+
 
 }

@@ -18,6 +18,11 @@ public class MenuEvent extends EventObject {
         this.selectedFilePath = selectedFilePath;
     }
 
+    public MenuEvent(Object source, int compressionQuality) {
+        super(source);
+        this.compressionQuality = compressionQuality;
+    }
+
     public String getCompressionType() {
         return compressionType;
     }
@@ -29,4 +34,5 @@ public class MenuEvent extends EventObject {
     public String getSelectedFilePath() {
         return selectedFilePath;
     }
+
 }
