@@ -2,15 +2,20 @@ package com.compression;
 
 import java.util.EventObject;
 
+/**
+ *  Klasa służąca do przekazywania informacji zebranych w MenuPanel do MainFrame (kontrolera).
+ */
 public class MenuEvent extends EventObject {
     private String compressionType;
     private int compressionQuality;
     private String selectedFilePath;
+    private String imprintInfo;
 
-    public MenuEvent(Object source, String compressionType, int compressionQuality) {
+    public MenuEvent(Object source, String compressionType, int compressionQuality, String annotations) {
         super(source);
         this.compressionType = compressionType;
         this.compressionQuality = compressionQuality;
+        this.imprintInfo = annotations;
     }
 
     public MenuEvent(Object source, String selectedFilePath) {
@@ -35,4 +40,7 @@ public class MenuEvent extends EventObject {
         return selectedFilePath;
     }
 
+    public String getImprintInfo() {
+        return imprintInfo;
+    }
 }

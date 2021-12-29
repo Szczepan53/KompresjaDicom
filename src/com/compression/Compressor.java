@@ -19,9 +19,9 @@ import java.io.File;
 import java.io.IOException;
 
 public class Compressor {
-    private static String dicomFile = "dicom_files\\D0001.dcm";
-    private static String outputJpgFile = "D0001JPG.jpg";
-    private static String outputPngFile = "D0001PNG.png";
+    private static final String dicomFile = "dicom_files\\D0001.dcm";
+    private static final String outputJpgFile = "D0001JPG.jpg";
+    private static final String outputPngFile = "D0001PNG.png";
     public static final String JPG = "jpg";
     public static final String PNG = "png";
     private static String  destinationPath;
@@ -39,8 +39,24 @@ public class Compressor {
 
 
     /* robi całą robote */
-    public static void compressImage(String dicomFilePath, String outputFilePath, String outputFormat, int imageQuality) throws IOException, DicomException {
-        ConsumerFormatImageMaker.convertFileToEightBitImage(dicomFilePath, outputFilePath,outputFormat,0,0,0,0,imageQuality, ConsumerFormatImageMaker.NO_ANNOTATIONS);
+
+    /**
+     * Funkcja opakowująca funkcję ConsumerFormatImageMaker.convertFileToEightBitImage() z biblioteki pixelmed
+     * @param dicomFilePath ścieżka pliku DICOM, który chcemy poddać kompresji
+     * @param outputFilePath ścieżka pliku wyjściowego
+     * @param outputFormat format kompresji (JPEG lub PNG)
+     * @param imageQuality jakość obrazu po kompresji (aplikowalna w przypadku kompresji JPEG)
+     * @param windowCenter środek okna przy okienkowaniu
+     * @param windowWidth szerokość okna przy okienkowaniu
+     * @param annotations pozwala umieścić informacje o pliku DICOM na obrazie wyjściowym
+     * @throws IOException
+     * @throws DicomException
+     */
+    public static void compressImage(String dicomFilePath, String outputFilePath, String outputFormat, int imageQuality,
+                                     double windowCenter, double windowWidth, String annotations) throws IOException, DicomException {
+
+        ConsumerFormatImageMaker.convertFileToEightBitImage(dicomFilePath, outputFilePath,outputFormat,windowCenter,
+                windowWidth, 0,0,imageQuality, annotations);
     }
 
 //    public static BufferedImage get8BitImage(AttributeList attrList) throws DicomException {
