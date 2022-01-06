@@ -12,7 +12,7 @@ import java.util.Arrays;
 
 public class NewWindow extends JFrame{
 
-    NewWindow(String path, String compessionType, int compressionQuality){
+    NewWindow(String path, CompressionType compressionType, int compressionQuality){
 
         BufferedImage img = null;
 
@@ -31,11 +31,11 @@ public class NewWindow extends JFrame{
         }
         String [] nameFile = path.split("\\\\");
         String name = nameFile[nameFile.length-1];
-        if(compessionType.equals("png")) {
+        if(compressionType == CompressionType.PNG) {
             this.setTitle("Image: "+ name);
         }
         else{
-            this.setTitle("Image: " + name + ", Compression rate: " + compressionQuality);
+            this.setTitle("Image: " + name + ", Image Quality: " + compressionQuality + "%");
         }
 
         this.setVisible(true);

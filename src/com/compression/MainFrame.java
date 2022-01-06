@@ -1,15 +1,15 @@
 package com.compression;
 
-import com.pixelmed.dicom.AttributeList;
-import com.pixelmed.dicom.DicomException;
-
-import javax.imageio.ImageIO;
+import com.pixelmed.dicom.*;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 
 
 /**
@@ -21,32 +21,33 @@ public class MainFrame extends JFrame {
     private final MenuPanel menuPanel;
     private final DicomTablePanel tablePanel;
     private final ImagePanel imagePanel;
-    private final ComparisonPanel comparisonPanel;
+//    private final ComparisonPanel comparisonPanel;
     public static String destinationFilePath;
     private String dicomFilePath;
     private String outputJpgFilePath;
     private String outputPngFilePath;
-    private final AttributeList dicomAttrs;
+    private AttributeList dicomAttrs;
+    private final ProgressDialog progressDialog;
 
     public MainFrame(String title, String dicomFilePath) throws DicomException, IOException {
         super(title);
         this.dicomFilePath = dicomFilePath;
-        this.outputJpgFilePath = makeCompressedFilePath(dicomFilePath, "jpg");
-        this.outputPngFilePath = makeCompressedFilePath(dicomFilePath, "png");
+        this.outputJpgFilePath = makeCompressedFilePath(dicomFilePath, "jpg", 50);
+        this.outputPngFilePath = makeCompressedFilePath(dicomFilePath, "png", 50);
         this.dicomAttrs = new AttributeList();
         this.dicomAttrs.read(dicomFilePath);
         this.imagePanel = new ImagePanel(dicomFilePath, this.dicomAttrs);
-        this.comparisonPanel = new ComparisonPanel();
+//        this.comparisonPanel = new ComparisonPanel();
         this.menuPanel = new MenuPanel();
         this.tablePanel = new DicomTablePanel();
         JPanel menuContainer = new JPanel();
         this.fileChooser = new JFileChooser();
+        this.progressDialog = new ProgressDialog(this);
         this.setJMenuBar(createMenuBar());
 
 
         this.setLayout(new BorderLayout());
         this.setSize(new Dimension(1280, 720));
-        this.setExtendedState(JFrame.MAXIMIZED_BOTH);
 
         /* Ustawienie akcji wykonywanej przy próbie zamknięcia okna */
         this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -59,8 +60,9 @@ public class MainFrame extends JFrame {
         });
 
         fileChooser.setFileFilter(new FileNameExtensionFilter("DICOM Files", "dcm"));
+        fileChooser.setCurrentDirectory(new File("dicom_files"));
         this.add(this.imagePanel, BorderLayout.CENTER);
-        this.add(this.comparisonPanel, BorderLayout.EAST);
+//        this.add(this.comparisonPanel, BorderLayout.EAST);
 
         /* Inicjalizacja panelu sterowania (menuPanel) oraz tablicy atrybutów wczytanego pliku DICOM */
         menuContainer.setLayout(new BorderLayout());
@@ -74,20 +76,16 @@ public class MainFrame extends JFrame {
             @Override
             public void menuEventHandler(MenuEvent ev) {
                 try {
-                    String compressionType = ev.getCompressionType();
+                    CompressionType compressionType = ev.getCompressionType();
                     int compressionQuality = ev.getCompressionQuality();
                     String imprintInfo = ev.getImprintInfo();
-                    setOutputJpgFilePath(makeCompressedFilePath(MainFrame.this.dicomFilePath, "jpg"));
-                    setOutputPngFilePath(makeCompressedFilePath(MainFrame.this.dicomFilePath, "png"));
-                    String outputFilePath = compressionType.equals("jpg") ? outputJpgFilePath : outputPngFilePath;
-
-                    Compressor.compressImage(MainFrame.this.dicomFilePath, outputFilePath,
-                            compressionType, compressionQuality,
-                            imagePanel.getWindowCenter(), imagePanel.getWindowWidth(),
-                            imprintInfo);
-
+                    setOutputJpgFilePath(makeCompressedFilePath(MainFrame.this.dicomFilePath, "jpg", compressionQuality));
+                    setOutputPngFilePath(makeCompressedFilePath(MainFrame.this.dicomFilePath, "png", compressionQuality));
+                    String outputFilePath = (compressionType == CompressionType.JPEG) ? outputJpgFilePath : outputPngFilePath;
                     setDestinationFilePath(outputFilePath);
-                    comparisonPanel.setUpperImage(ImageIO.read(new File(outputFilePath)));
+
+                    compressDicomImage(outputFilePath, compressionType, compressionQuality, imprintInfo);
+//                    comparisonPanel.setUpperImage(ImageIO.read(new File(outputFilePath)));
                 } catch (IOException | DicomException ex) {
                     ex.printStackTrace();
                 }
@@ -102,15 +100,19 @@ public class MainFrame extends JFrame {
         });
 
 
+        this.setLocationRelativeTo(null); //Centruje okno na ekranie
         this.setVisible(true);
 
     }
 
 
     /** Funkcja tworząca ścieżkę pliku wyjściowego (po kompresji) na podstawie ścieżki pliku wejściowego (DICOM)
-    *
-    * <p>>imo trzeba zrobić tak żeby zapisywał stopień stopień kompresji pliku wyściowego w nazwie pliku </p>*/
-    private static String makeCompressedFilePath(String filePath, String destFormat) {
+     * oraz wybranego imageQuality.
+     * <p>Jeśli utworzona ścieżka pliku wyjściowego już istnieje to modyfikuje utworzoną ścieżkę o suffiks {liczba}.</p>
+     * */
+    private static String makeCompressedFilePath(String filePath, String destFormat, int imageQuality) {
+
+        String qualityPart = destFormat.equals("jpg")? ("_quality_" + imageQuality) : "";
 
         String[] partPath = filePath.split("\\\\");
         partPath[partPath.length - 2] += "\\outputs";
@@ -118,11 +120,14 @@ public class MainFrame extends JFrame {
         String changedFormatLastPart;
         try{
             lastPart[1] = destFormat;
+            lastPart[0] += qualityPart;
             changedFormatLastPart = String.join(".", lastPart);
         }
         catch (IndexOutOfBoundsException ex){
+            lastPart[0] += qualityPart;
             changedFormatLastPart = lastPart[0] + "." + destFormat;
         }
+
         partPath[partPath.length - 1] = changedFormatLastPart;
         String newPath = String.join("\\", partPath);
         String dirPath = newPath.replace(changedFormatLastPart, "");
@@ -130,26 +135,91 @@ public class MainFrame extends JFrame {
         if (!outputsDir.exists()) {
             outputsDir.mkdir();
         }
-        File imagePath = new File(newPath);
-        if(imagePath.exists()){
-            partPath = filePath.split("\\\\");
-            partPath[partPath.length - 2] += "\\outputs";
-            lastPart = partPath[partPath.length - 1].split("\\.");
-            lastPart[0] = lastPart[0]+"(1)";
+
+        //Wyciągnięcie ostatniego numeru pliku w nawiasach
+        String fileName = lastPart[0];
+        File[] matchedFiles = outputsDir.listFiles(new OutputFileFilter(fileName));
+        String latestFile = null;
+
+        if(matchedFiles != null && matchedFiles.length > 0) {
+           latestFile = Arrays.stream(matchedFiles)
+                   .map((File file) -> file.getName().split("\\.")[0])
+                   .sorted().peek(System.out::println)
+                   .max(Comparator.naturalOrder()).get();
+        }
+
+        int lastNumber = -1;
+        if(latestFile != null) {
+            lastNumber = 0;
+            String[] parts = latestFile.split("\\{");
+            try {
+                lastNumber = Integer.parseInt(parts[parts.length-1].substring(0, 1));
+            }
+            catch (ArrayIndexOutOfBoundsException | NumberFormatException ignore) {}
+        }
+
+
+        if(lastNumber >= 0){
+            lastPart[0] = lastPart[0] + "{" + (++lastNumber) + "}";
             lastPart[1] = destFormat;
             changedFormatLastPart = String.join(".", lastPart);
-            partPath[partPath.length - 1] = changedFormatLastPart;
-            newPath = String.join("\\", partPath);
+            newPath = dirPath + changedFormatLastPart;
         }
         System.out.println(newPath);
-//        destinationFilePath = newPath;
+
         return newPath;
+    }
+
+
+    private void compressDicomImage(String outputFilePath,
+                                    CompressionType compressionType,
+                                    int compressionQuality,
+                                    String imprintInfo) throws IOException, DicomException{
+
+        int nFrames = Attribute.getSingleIntegerValueOrDefault(this.dicomAttrs, TagFromName.NumberOfFrames, 1);
+
+        this.progressDialog.setnFrames(nFrames);
+        this.progressDialog.setCompressionFormat(compressionType.toString());
+        this.progressDialog.setVisible(true);
+
+        SwingWorker<Integer, Integer> worker = new SwingWorker<Integer, Integer>() {
+            private String firstOutputFilePath;
+
+            @Override
+            protected Integer doInBackground() throws Exception {
+
+                String[] outputFilePaths = Compressor.compressImage(MainFrame.this.dicomFilePath, outputFilePath,
+                        compressionType.toString(), compressionQuality,
+                        imagePanel.getWindowCenter(), imagePanel.getWindowWidth(),
+                        imprintInfo);
+
+                this.firstOutputFilePath = outputFilePaths[0];
+                return null;
+            }
+
+            @Override
+            protected void process(List<Integer> chunks) {
+                super.process(chunks);
+            }
+
+            @Override
+            protected void done() {
+                super.done();
+                progressDialog.setVisible(false);
+                NewWindow myWindow = new NewWindow(this.firstOutputFilePath, compressionType, compressionQuality);
+            }
+        };
+
+        worker.execute();
+
+
     }
 
     private void setDicomFilePath(String dicomFilePath) {
         this.dicomFilePath = dicomFilePath;
     }
-    private void setDestinationFilePath(String destinationFilePath){
+
+    private static void setDestinationFilePath(String destinationFilePath){
         MainFrame.destinationFilePath = destinationFilePath;
     }
 
@@ -169,7 +239,7 @@ public class MainFrame extends JFrame {
         this.outputPngFilePath = outputPngFilePath;
     }
 
-    /* Inicjalizacja menuBar na górze ekranu
+    /** Inicjalizacja menuBar na górze ekranu
     * > menuFile pozwala wczytać plik DICOM (przeniosłem tu do openFileItem to co mieliśmy jako ten przycisk Choose File),
     * a także pozwala zamknąć program
     *
@@ -184,6 +254,7 @@ public class MainFrame extends JFrame {
         fileMenu.setMnemonic(KeyEvent.VK_F);
 
         JMenuItem openFileItem = new JMenuItem("Open...", new ImageIcon("icons/png/ic-folder.png"));
+        openFileItem.setToolTipText("Select and open DICOM file...");
         openFileItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -191,23 +262,50 @@ public class MainFrame extends JFrame {
                 if (response == JFileChooser.APPROVE_OPTION) {
                     File path = new File(fileChooser.getSelectedFile().getAbsolutePath());
                     String selectedFilePath = path.getAbsolutePath();
-                    try {
-                        setDicomFilePath(selectedFilePath);
-                        setOutputJpgFilePath(makeCompressedFilePath(selectedFilePath, "jpg"));
-                        setOutputPngFilePath(makeCompressedFilePath(selectedFilePath, "png"));
-                        setImage(dicomFilePath);
-                        dicomAttrs.clear();
-                        dicomAttrs.read(dicomFilePath);
-                        tablePanel.setData(dicomAttrs);
-                    } catch (IOException | DicomException ex) {
-                        ex.printStackTrace();
+                    if(DicomFileUtilities.isDicomOrAcrNemaFile(path)) { //Sprawdzenie czy ładowany plik zawiera DICOM dataset
+                            AttributeList newAttrs = new AttributeList();
+                        try {
+                            newAttrs.read(selectedFilePath);
+                            setImage(selectedFilePath);
+
+                        } catch (IOException | DicomException ex) {
+                            ex.printStackTrace();
+                        }
+                        //Jeśli plik dicom załadował się poprawnie to zaktualizuj dane
+                            setDicomFilePath(selectedFilePath);
+
+                            dicomAttrs = newAttrs;
+                            tablePanel.setData(dicomAttrs);
                     }
+                    else{
+                        JOptionPane.showMessageDialog(MainFrame.this,
+                                "Cannot load file " + selectedFilePath,
+                                "Error loading DICOM",
+                                JOptionPane.ERROR_MESSAGE);
+                    }
+
                 }
             }
         });
 
         openFileItem.setMnemonic(KeyEvent.VK_O);
         openFileItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_MASK));
+
+        JMenuItem fullscreenFileItem = new JMenuItem("Fullscreen", new ImageIcon("icons/png/ic-monitor.png"));
+        fullscreenFileItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F12, InputEvent.CTRL_MASK));
+
+        fullscreenFileItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                MainFrame.this.dispose();
+                boolean isFullscreen = MainFrame.this.isUndecorated();
+                MainFrame.this.setUndecorated(!isFullscreen);
+                fullscreenFileItem.setText(isFullscreen? "Fullscreen" : "Exit fullscreen");
+                MainFrame.this.pack();
+                MainFrame.this.setExtendedState(JFrame.MAXIMIZED_BOTH);
+                MainFrame.this.setVisible(true);
+            }
+        });
 
         JMenuItem exitFileItem = new JMenuItem("Exit");
         exitFileItem.setMnemonic(KeyEvent.VK_X);
@@ -219,6 +317,8 @@ public class MainFrame extends JFrame {
             }
         });
         fileMenu.add(openFileItem);
+        fileMenu.addSeparator();
+        fileMenu.add(fullscreenFileItem);
         fileMenu.addSeparator();
         fileMenu.add(exitFileItem);
         menuBar.add(fileMenu);

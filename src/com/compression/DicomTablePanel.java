@@ -10,7 +10,6 @@ import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.MouseEvent;
-import java.io.IOException;
 
 /**
  * Panel tablicy z danymi wyciągniętymi z pliku DICOM, wyświetlany w lewym dolnym rogu aplikacji.

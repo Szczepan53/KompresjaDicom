@@ -12,7 +12,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 public class Main {
-    private static final String dicomFile = "dicom_files\\MRBRAIN.DCM";
+    private static final String dicomFile = "dicom_files\\MammoTomoUPMC_Case10\\Case10 [Case10]\\Series 73200000 [MG - L MLO Breast Tomosynthesis Image].dcm";
     private static final BufferedImage image = null;
     private static SourceImage srcImage;
 

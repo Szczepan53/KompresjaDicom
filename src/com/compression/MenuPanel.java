@@ -20,7 +20,6 @@ public class MenuPanel extends JPanel implements ChangeListener {
     private final JComboBox<CompressionType> compressionTypeCombo;
     private final JButton compressButton;
     private MenuPanelListener menuPanelListener;
-    private static final ArrayList<String> compressionTypes = new ArrayList<>(Arrays.asList("jpg", "png"));
     public String file;
     private final JSlider slider;
     private final JLabel label;
@@ -36,8 +35,10 @@ public class MenuPanel extends JPanel implements ChangeListener {
         this.setPreferredSize(new Dimension(300, 200));
         this.compressionTypeCombo = new JComboBox<>();
         this.compressButton = new JButton("Compress image");
+        this.compressButton.setToolTipText("Compress currently open image to selected format");
 
         slider = new JSlider(1,100,50);//Maksymalny stopień kompresji ustawiłam na 10, ale to może być do zmiany
+        cr = slider.getValue();
 //        slider.setPaintTicks(true);
         slider.setMinorTickSpacing(1);
         slider.setPaintTrack(true);
@@ -47,13 +48,15 @@ public class MenuPanel extends JPanel implements ChangeListener {
         label = new JLabel();
         label.setText("Compressed image quality = "+ slider.getValue() + "%");
         slider.addChangeListener(this);
+        slider.setToolTipText("Move slider to select image quality after compression");
 
 
 
         DefaultComboBoxModel<CompressionType> compressionTypeComboModel = new DefaultComboBoxModel<>();
-        compressionTypeComboModel.addElement(new CompressionType(0, "JPEG"));
-        compressionTypeComboModel.addElement(new CompressionType(1, "PNG"));
+        compressionTypeComboModel.addElement(CompressionType.JPEG);
+        compressionTypeComboModel.addElement(CompressionType.PNG);
         this.compressionTypeCombo.setModel(compressionTypeComboModel);
+        this.compressionTypeCombo.setToolTipText("Select compression format");
 
         this.noneRadio = new JRadioButton("None");
         this.someRadio = new JRadioButton("Some");
@@ -64,14 +67,18 @@ public class MenuPanel extends JPanel implements ChangeListener {
         this.noneRadio.setActionCommand("none");
         this.noneRadio.setVerticalTextPosition(SwingConstants.TOP);
         this.noneRadio.setHorizontalTextPosition(SwingConstants.CENTER);
+        this.noneRadio.setToolTipText("Don't imprint DICOM info on output image(s)");
 
         this.someRadio.setActionCommand("icon");
         this.someRadio.setVerticalTextPosition(SwingConstants.TOP);
         this.someRadio.setHorizontalTextPosition(SwingConstants.CENTER);
+        this.someRadio.setToolTipText("Imprint some DICOM info on output image(s)");
+
 
         this.allRadio.setActionCommand("all");
         this.allRadio.setVerticalTextPosition(SwingConstants.TOP);
         this.allRadio.setHorizontalTextPosition(SwingConstants.CENTER);
+        this.allRadio.setToolTipText("Imprint a lot of DICOM info on output image(s)");
 
         this.noneRadio.setSelected(true);
         this.imprintInfoGroup.add(this.noneRadio);
@@ -88,11 +95,10 @@ public class MenuPanel extends JPanel implements ChangeListener {
         this.compressButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                MenuEvent ev = new MenuEvent(e, compressionTypes.get(compressionTypeCombo.getSelectedIndex()),
+                MenuEvent ev = new MenuEvent(e, (CompressionType) compressionTypeCombo.getSelectedItem(),
                         cr, imprintInfoGroup.getSelection().getActionCommand());
 
                 menuPanelListener.menuEventHandler(ev);
-                NewWindow myWindow = new NewWindow(MainFrame.destinationFilePath, ev.getCompressionType(), ev.getCompressionQuality());
             }
         });
 
@@ -188,24 +194,5 @@ public class MenuPanel extends JPanel implements ChangeListener {
     public void stateChanged(ChangeEvent e) {
         label.setText("Compressed image quality = "+ this.slider.getValue() + "%");
         this.cr = this.slider.getValue();
-    }
-
-    static class CompressionType {
-        private final int id;
-        private final String text;
-
-        public CompressionType(int id, String text) {
-            this.id = id;
-            this.text = text;
-        }
-
-        public int getId() {
-            return id;
-        }
-
-        @Override
-        public String toString() {
-            return this.text;
-        }
     }
 }
