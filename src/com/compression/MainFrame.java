@@ -28,6 +28,7 @@ public class MainFrame extends JFrame {
     private String outputPngFilePath;
     private AttributeList dicomAttrs;
     private final ProgressDialog progressDialog;
+    private Dimension lastSize;
 
     public MainFrame(String title, String dicomFilePath) throws DicomException, IOException {
         super(title);
@@ -43,11 +44,12 @@ public class MainFrame extends JFrame {
         JPanel menuContainer = new JPanel();
         this.fileChooser = new JFileChooser();
         this.progressDialog = new ProgressDialog(this);
+        this.lastSize = new Dimension(1280, 720);
         this.setJMenuBar(createMenuBar());
 
 
         this.setLayout(new BorderLayout());
-        this.setSize(new Dimension(1280, 720));
+        this.setSize(this.lastSize);
 
         /* Ustawienie akcji wykonywanej przy próbie zamknięcia okna */
         this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -302,7 +304,13 @@ public class MainFrame extends JFrame {
                 MainFrame.this.setUndecorated(!isFullscreen);
                 fullscreenFileItem.setText(isFullscreen? "Fullscreen" : "Exit fullscreen");
                 MainFrame.this.pack();
-                MainFrame.this.setExtendedState(JFrame.MAXIMIZED_BOTH);
+                if(isFullscreen) {
+                    MainFrame.this.setSize(MainFrame.this.lastSize);
+                }
+                else {
+                    MainFrame.this.lastSize = MainFrame.this.getSize();
+                    MainFrame.this.setExtendedState(JFrame.MAXIMIZED_BOTH);
+                }
                 MainFrame.this.setVisible(true);
             }
         });
