@@ -13,7 +13,7 @@ import java.io.IOException;
 /**
 Wyświetla obrazy po kompresji w okienkach po prawej stronie obrazu oryginalnego.
 Tu w sumie zrobiłem poglądowo tylko jak to mogłoby wyglądać żeby ta prawa strona nie była taka pusta ale nie jest to dokończone.
- <p>Jak na razie wyłączona w MainFrame</p>
+ <p>Jak na razie wyłączona w MainFrame, zamiast tego zrobiłbym możliwość porównania obrazów w newWindow.</p>
 */
 public class ComparisonPanel extends JPanel {
     private BufferedImage upperImage;
