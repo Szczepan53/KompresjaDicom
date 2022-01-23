@@ -4,7 +4,9 @@ import com.pixelmed.dicom.DicomException;
 import com.pixelmed.display.ConsumerFormatImageMaker;
 import java.io.IOException;
 
-
+/**
+ * Klasa statyczna udostępniająca metodę kompresji danych obrazowych z pliku DICOM.
+ */
 public abstract class Compressor {
     /**
      * Funkcja opakowująca funkcję ConsumerFormatImageMaker.convertFileToEightBitImage() z biblioteki pixelmed. Odpowiada

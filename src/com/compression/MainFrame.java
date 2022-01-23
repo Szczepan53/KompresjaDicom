@@ -259,10 +259,8 @@ public class MainFrame extends JFrame{
     }
 
     /** Inicjalizacja menuBar na górze ekranu
-    * <p>> menuFile pozwala wczytać plik DICOM (przeniosłem tu do openFileItem to co mieliśmy jako ten przycisk Choose File),
-    * a także pozwala zamknąć program</p>
-    *
-    * <p>> menuTools ma opcję otworzenia okienka do porównywania obrazów
+    * <p>menuFile pozwala wczytać plik DICOM, przejść w tryb pełnoekranowy, a także pozwala zamknąć program</p>
+    * <p>menuTools ma opcję otworzenia okienka do porównywania obrazów
     * */
 
     private JMenuBar createMenuBar(){
