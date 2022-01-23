@@ -11,6 +11,13 @@ public class MenuEvent extends EventObject {
     private String selectedFilePath;
     private String imprintInfo;
 
+    /**
+     * Inizjalizacja instancji MenuEvent
+     * @param source referencja do obiektu, który wywołał zdarzenie
+     * @param compressionType typ wybranej w MenuPanel kompresji
+     * @param compressionQuality jakość wyjściowego obrazu po kompresji wybrana w MenuPanel
+     * @param annotations flaga decydująca o nadrukowaniu dodatkowych informacji DICOM na obrazie wyjściowym wybrana w MenuPanel
+     */
     public MenuEvent(Object source, CompressionType compressionType, int compressionQuality, String annotations) {
         super(source);
         this.compressionType = compressionType;

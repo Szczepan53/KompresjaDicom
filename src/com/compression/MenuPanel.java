@@ -7,8 +7,6 @@ import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.Arrays;
 
 
 /**
@@ -24,22 +22,20 @@ public class MenuPanel extends JPanel implements ChangeListener {
     private final JSlider slider;
     private final JLabel label;
     private int cr;
-    private final JRadioButton noneRadio;
-    private final JRadioButton someRadio;
-    private final JRadioButton allRadio;
     private final ButtonGroup imprintInfoGroup;
     private final JPanel imprintInfoPanel;
 
-
+    /**
+     * Inicjalizacja MenuPanel.
+     */
     public MenuPanel(){
         this.setPreferredSize(new Dimension(300, 200));
         this.compressionTypeCombo = new JComboBox<>();
         this.compressButton = new JButton("Compress image");
         this.compressButton.setToolTipText("Compress currently open image to selected format");
 
-        slider = new JSlider(1,100,50);//Maksymalny stopień kompresji ustawiłam na 10, ale to może być do zmiany
+        slider = new JSlider(1,100,50);
         cr = slider.getValue();
-//        slider.setPaintTicks(true);
         slider.setMinorTickSpacing(1);
         slider.setPaintTrack(true);
         slider.setMajorTickSpacing(49);
@@ -57,40 +53,41 @@ public class MenuPanel extends JPanel implements ChangeListener {
         this.compressionTypeCombo.setModel(compressionTypeComboModel);
         this.compressionTypeCombo.setToolTipText("Select compression format");
 
-        this.noneRadio = new JRadioButton("None");
-        this.someRadio = new JRadioButton("Some");
-        this.allRadio = new JRadioButton("All");
+        JRadioButton noneRadio = new JRadioButton("None");
+        JRadioButton someRadio = new JRadioButton("Some");
+        JRadioButton allRadio = new JRadioButton("All");
         this.imprintInfoGroup = new ButtonGroup();
 
         //Set up imprintInfoGroup radioButtons
-        this.noneRadio.setActionCommand("none");
-        this.noneRadio.setVerticalTextPosition(SwingConstants.TOP);
-        this.noneRadio.setHorizontalTextPosition(SwingConstants.CENTER);
-        this.noneRadio.setToolTipText("Don't imprint DICOM info on output image(s)");
+        noneRadio.setActionCommand("none");
+        noneRadio.setVerticalTextPosition(SwingConstants.TOP);
+        noneRadio.setHorizontalTextPosition(SwingConstants.CENTER);
+        noneRadio.setToolTipText("Don't imprint DICOM info on output image(s)");
 
-        this.someRadio.setActionCommand("icon");
-        this.someRadio.setVerticalTextPosition(SwingConstants.TOP);
-        this.someRadio.setHorizontalTextPosition(SwingConstants.CENTER);
-        this.someRadio.setToolTipText("Imprint some DICOM info on output image(s)");
+        someRadio.setActionCommand("icon");
+        someRadio.setVerticalTextPosition(SwingConstants.TOP);
+        someRadio.setHorizontalTextPosition(SwingConstants.CENTER);
+        someRadio.setToolTipText("Imprint some DICOM info on output image(s)");
 
 
-        this.allRadio.setActionCommand("all");
-        this.allRadio.setVerticalTextPosition(SwingConstants.TOP);
-        this.allRadio.setHorizontalTextPosition(SwingConstants.CENTER);
-        this.allRadio.setToolTipText("Imprint a lot of DICOM info on output image(s)");
+        allRadio.setActionCommand("all");
+        allRadio.setVerticalTextPosition(SwingConstants.TOP);
+        allRadio.setHorizontalTextPosition(SwingConstants.CENTER);
+        allRadio.setToolTipText("Imprint a lot of DICOM info on output image(s)");
 
-        this.noneRadio.setSelected(true);
-        this.imprintInfoGroup.add(this.noneRadio);
-        this.imprintInfoGroup.add(this.someRadio);
-        this.imprintInfoGroup.add(this.allRadio);
+        noneRadio.setSelected(true);
+        this.imprintInfoGroup.add(noneRadio);
+        this.imprintInfoGroup.add(someRadio);
+        this.imprintInfoGroup.add(allRadio);
 
         this.imprintInfoPanel = new JPanel(new BorderLayout());
-        this.imprintInfoPanel.add(this.noneRadio, BorderLayout.WEST);
-        this.imprintInfoPanel.add(this.someRadio, BorderLayout.CENTER);
-        this.imprintInfoPanel.add(this.allRadio, BorderLayout.EAST);
+        this.imprintInfoPanel.add(noneRadio, BorderLayout.WEST);
+        this.imprintInfoPanel.add(someRadio, BorderLayout.CENTER);
+        this.imprintInfoPanel.add(allRadio, BorderLayout.EAST);
         this.imprintInfoPanel.setBorder(BorderFactory.createLoweredBevelBorder());
 
 
+        //Wciśnięcie przycisku Compress Image powoduje rozpoczęcie procesu kompresji z uwzględnieniem wybranych parametrów.
         this.compressButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -101,6 +98,7 @@ public class MenuPanel extends JPanel implements ChangeListener {
             }
         });
 
+        //Wybranie kompresji PNG powoduje wygaszenie suwaka wyboru stopnia kompresji.
         this.compressionTypeCombo.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -115,7 +113,6 @@ public class MenuPanel extends JPanel implements ChangeListener {
         this.setLayout(new GridBagLayout());
         this.setUpLayout();
     }
-
 
     private void setUpLayout() {
         GridBagConstraints gc = new GridBagConstraints();
@@ -189,6 +186,10 @@ public class MenuPanel extends JPanel implements ChangeListener {
         this.menuPanelListener = menuPanelListener;
     }
 
+    /**
+     * Funkcja uruchamiana przy zmianie pozycji suwaka wyboru stopnia kompresji.
+     * @param e
+     */
     @Override
     public void stateChanged(ChangeEvent e) {
         label.setText("Compressed image quality = "+ this.slider.getValue() + "%");

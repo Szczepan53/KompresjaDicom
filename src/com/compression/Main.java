@@ -1,36 +1,26 @@
 package com.compression;
 
-import com.pixelmed.dicom.AttributeList;
-import com.pixelmed.dicom.AttributeTag;
+import com.formdev.flatlaf.FlatLightLaf;
 import com.pixelmed.dicom.DicomException;
-import com.pixelmed.dicom.TagFromName;
-import com.pixelmed.display.SourceImage;
 
 import javax.swing.*;
-import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 
+/**
+ * Klasa główna służąca do poprawnego uruchomienia programu.
+ */
 public class Main {
-    private static final String dicomFile = "C:\\Users\\tleks\\Documents\\sem5\\JAVA\\projekt\\PAT034\\D0001.dcm";
-    private static final BufferedImage image = null;
-    private static SourceImage srcImage;
+    //Ścieżka do pliku DICOM otwieranego przy uruchamianiu programu.
+    private static final String dicomFile = "dicom_files\\MammoTomoUPMC_Case1\\Case1 [Case1]\\Series 73200000 [MG - L MLO Breast Tomosynthesis Image].dcm";
 
     public static void main(String[] args) {
-//        try {
-//            srcImage = new SourceImage(dicomFile);
-//        }
-//        catch (IOException | DicomException ex) {
-//            System.out.println("ERROR loading DICOM file...");
-//            ex.printStackTrace();
-//            System.exit(-1);
-//        }
-
+        //Uruchomienie programu w oddzielnym wątku.
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
                 try {
-                    MainFrame mainFrame = new MainFrame("DICOM Image Compression App", dicomFile);
+                    FlatLightLaf.install(); //Ustawienie skórki programu na bardziej nowoczesną.
+                    MainFrame mainFrame = new MainFrame("DICOM image compression app", dicomFile);
                 }
                 catch (DicomException | IOException ex) {
                     ex.printStackTrace();

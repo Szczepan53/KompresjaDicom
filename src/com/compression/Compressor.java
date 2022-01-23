@@ -6,11 +6,9 @@ import java.io.IOException;
 
 
 public abstract class Compressor {
-
-    /* robi całą robote */
-
     /**
-     * Funkcja opakowująca funkcję ConsumerFormatImageMaker.convertFileToEightBitImage() z biblioteki pixelmed
+     * Funkcja opakowująca funkcję ConsumerFormatImageMaker.convertFileToEightBitImage() z biblioteki pixelmed. Odpowiada
+     * z cały proces kompresji załadowanego obrazu DICOM z parametrami wybranymi przez użytkownika.
      * @param dicomFilePath ścieżka pliku DICOM, który chcemy poddać kompresji
      * @param outputFilePath ścieżka pliku wyjściowego
      * @param outputFormat format kompresji (JPEG lub PNG)

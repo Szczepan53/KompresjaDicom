@@ -3,7 +3,6 @@ package com.compression;
 import com.pixelmed.dicom.*;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.plaf.FileChooserUI;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
@@ -15,22 +14,28 @@ import java.util.List;
 
 /**
  * Okno główne aplikacji.
- * <p>Pełni rolę kontrolera spajając wszystkie elementy aplikacji i przekazując dane pomiędzy nimi.</p>
+ * <p>Pełni rolę kontenera oraz kontrolera spajając wszystkie elementy aplikacji i przekazując dane pomiędzy nimi.</p>
  */
-public class MainFrame extends JFrame {
+public class MainFrame extends JFrame{
     private final JFileChooser fileChooser;
     private final MenuPanel menuPanel;
     private final DicomTablePanel tablePanel;
     private final ImagePanel imagePanel;
-//    private final ComparisonPanel comparisonPanel;
     public static String destinationFilePath;
     private String dicomFilePath;
-    private String outputJpgFilePath;
-    private String outputPngFilePath;
+    public String outputJpgFilePath;
+    public String outputPngFilePath;
     private AttributeList dicomAttrs;
     private final ProgressDialog progressDialog;
     private Dimension lastSize;
 
+    /**
+     * Inicjalizacja okna głównego aplikacji.
+     * @param title tytuł okna głównego
+     * @param dicomFilePath ścieżka pliku DICOM ładowanego przy uruchamianiu aplikacji
+     * @throws DicomException
+     * @throws IOException
+     */
     public MainFrame(String title, String dicomFilePath) throws DicomException, IOException {
         super(title);
         this.dicomFilePath = dicomFilePath;
@@ -39,7 +44,6 @@ public class MainFrame extends JFrame {
         this.dicomAttrs = new AttributeList();
         this.dicomAttrs.read(dicomFilePath);
         this.imagePanel = new ImagePanel(dicomFilePath, this.dicomAttrs);
-//        this.comparisonPanel = new ComparisonPanel();
         this.menuPanel = new MenuPanel();
         this.tablePanel = new DicomTablePanel();
         JPanel menuContainer = new JPanel();
@@ -65,7 +69,6 @@ public class MainFrame extends JFrame {
         fileChooser.setFileFilter(new FileNameExtensionFilter("DICOM Files", "dcm"));
         fileChooser.setCurrentDirectory(new File("dicom_files"));
         this.add(this.imagePanel, BorderLayout.CENTER);
-//        this.add(this.comparisonPanel, BorderLayout.EAST);
 
         /* Inicjalizacja panelu sterowania (menuPanel) oraz tablicy atrybutów wczytanego pliku DICOM */
         menuContainer.setLayout(new BorderLayout());
@@ -88,7 +91,6 @@ public class MainFrame extends JFrame {
                     setDestinationFilePath(outputFilePath);
 
                     compressDicomImage(outputFilePath, compressionType, compressionQuality, imprintInfo);
-//                    comparisonPanel.setUpperImage(ImageIO.read(new File(outputFilePath)));
                 } catch (IOException | DicomException ex) {
                     ex.printStackTrace();
                 }
@@ -173,7 +175,16 @@ public class MainFrame extends JFrame {
         return newPath;
     }
 
-
+    /**
+     * Funkcja opakowująca funkcję compressImage z klasy statycznej Compressor, pozwalająca operacji kompresji obrazu
+     * na działanie w oddzielnym wątku.
+     * @param outputFilePath ścieżka docelowa pliku po kompresji
+     * @param compressionType żądany typ kompresji (JPEG lub PNG)
+     * @param compressionQuality żądana jakość po kompresji (w przypadku kompresji JPEG)
+     * @param imprintInfo parametr decydujący, czy nadrukować dodatkowe informacji z pliku DICOM na obraz wyjściowy
+     * @throws IOException
+     * @throws DicomException
+     */
     private void compressDicomImage(String outputFilePath,
                                     CompressionType compressionType,
                                     int compressionQuality,
@@ -209,17 +220,6 @@ public class MainFrame extends JFrame {
             protected void done() {
                 super.done();
                 progressDialog.setVisible(false);
-                EventQueue.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        try{
-                            NewWindow myWindow = new NewWindow(firstOutputFilePath, compressionType, compressionQuality);
-                        }catch(Exception e){
-                            e.printStackTrace();
-                        }
-                    }
-                });
-
             }
         };
 
@@ -236,6 +236,12 @@ public class MainFrame extends JFrame {
         MainFrame.destinationFilePath = destinationFilePath;
     }
 
+    /**
+     * Zmienia wyświetlany w ImagePanel plik obrazu z DICOMa.
+     * @param newDicomFilePath ścieżka nowego pliku DICOM, którego dane obrazowe mają zostać wyświetlone w ImagePanel
+     * @throws IOException
+     * @throws DicomException
+     */
     private void setImage(String newDicomFilePath) throws IOException, DicomException {
         this.dicomAttrs.clear();
         this.dicomAttrs.read(newDicomFilePath);
@@ -253,10 +259,10 @@ public class MainFrame extends JFrame {
     }
 
     /** Inicjalizacja menuBar na górze ekranu
-    * > menuFile pozwala wczytać plik DICOM (przeniosłem tu do openFileItem to co mieliśmy jako ten przycisk Choose File),
-    * a także pozwala zamknąć program
+    * <p>> menuFile pozwala wczytać plik DICOM (przeniosłem tu do openFileItem to co mieliśmy jako ten przycisk Choose File),
+    * a także pozwala zamknąć program</p>
     *
-    * > w menuTools chciałem zrobić to narzędzie do zoomowania obrazków (zoomToolItem) ale nie mam na razie pomysłu jak
+    * <p>> menuTools ma opcję otworzenia okienka do porównywania obrazów
     * */
 
     private JMenuBar createMenuBar(){
@@ -346,23 +352,11 @@ public class MainFrame extends JFrame {
         JMenu toolsMenu = new JMenu("Tools");
         toolsMenu.setMnemonic(KeyEvent.VK_T);
 
-        JMenuItem compareToolItem = new JMenuItem("Compare", new ImageIcon("icons/png/ic-magnifying-glass.png"));
-        compareToolItem.setToolTipText("Select DICOM files to compare");
-        compareToolItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e){
-                EventQueue.invokeLater(new Runnable() {
-                    public void run() {
-                        try {
-                            CompareWindow window = new CompareWindow("Image comparison");
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });
+        JMenuItem compareToolItem = new JMenuItem("Compare images",
+                new ImageIcon("icons/png/ic-magnifying-glass.png"));
 
-            }
-        });
+        compareToolItem.addActionListener((a)->new ComparisonWindow(MainFrame.this));
+
         toolsMenu.add(compareToolItem);
         menuBar.add(toolsMenu);
 

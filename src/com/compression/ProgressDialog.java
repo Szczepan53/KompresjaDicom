@@ -6,6 +6,8 @@ import java.awt.*;
 
 /**
  * Okienko dialogowe wyświetlające pasek postępu w trakcie kompresji obrazu z DICOMa.
+ * <p>Pasek postępu ustawiony jest jako "niezdeterminowany" - sygnalizuje proces dziejący się w tle, ale nie pokazuje
+ * ile zostało do jego ukończenia.</p>
  */
 
 public class ProgressDialog extends JDialog {

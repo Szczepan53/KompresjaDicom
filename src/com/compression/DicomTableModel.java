@@ -29,11 +29,15 @@ public class DicomTableModel extends AbstractTableModel {
         this.setData(dicomAttrs);
     }
 
+        /**
+         * Funkcja wczytująca do modelu tablicy atrybuty nowo załadowanego pliku DICOM.
+         * @param dicomAttrs - posortowana mapa atrybutów ładowanego pliku DICOM
+         */
     public void setData(AttributeList dicomAttrs) {
         this.attrsMap = new TreeMap<>();
         for(Map.Entry<AttributeTag, Attribute> entry : dicomAttrs.entrySet()){
             String attributeName = dicomDictionary.getNameFromTag(entry.getKey());
-            if(attributeName == null) continue; //skip attributes unhandled by pixelmed library
+            if(attributeName == null) continue; //pomijamy atrybuty których pixelmed nie obsługuje
 
             String valueString = entry.getValue().getDelimitedStringValuesOrNull();
             if(valueString != null){
@@ -61,6 +65,11 @@ public class DicomTableModel extends AbstractTableModel {
         this.fireTableDataChanged();
     }
 
+        /**
+         * Funkcja aktualizująca w tablicy numer obecnie wyświetlanego frame'a (komórka InstanceNumber) w przypadku
+         * plików obrazowych o wielu frame'ach.
+         * @param newFrame - numer nowego frame'a
+         */
     public void updateFrame(int newFrame) {
         if(!attrsMap.containsKey("NumberOfFrames") || this.instanceNumberRow < 0) return;
 

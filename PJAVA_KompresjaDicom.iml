@@ -9,5 +9,6 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="pixelmed" level="application" />
     <orderEntry type="library" name="vecmath" level="application" />
+    <orderEntry type="library" name="flatlaf" level="project" />
   </component>
 </module>
