@@ -3,6 +3,7 @@ package com.compression;
 import com.pixelmed.dicom.*;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.plaf.FileChooserUI;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
@@ -208,7 +209,17 @@ public class MainFrame extends JFrame {
             protected void done() {
                 super.done();
                 progressDialog.setVisible(false);
-                NewWindow myWindow = new NewWindow(this.firstOutputFilePath, compressionType, compressionQuality);
+                EventQueue.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        try{
+                            NewWindow myWindow = new NewWindow(firstOutputFilePath, compressionType, compressionQuality);
+                        }catch(Exception e){
+                            e.printStackTrace();
+                        }
+                    }
+                });
+
             }
         };
 
@@ -335,9 +346,24 @@ public class MainFrame extends JFrame {
         JMenu toolsMenu = new JMenu("Tools");
         toolsMenu.setMnemonic(KeyEvent.VK_T);
 
-        JMenuItem zoomToolItem = new JMenuItem("Zoom", new ImageIcon("icons/png/ic-magnifying-glass.png"));
+        JMenuItem compareToolItem = new JMenuItem("Compare", new ImageIcon("icons/png/ic-magnifying-glass.png"));
+        compareToolItem.setToolTipText("Select DICOM files to compare");
+        compareToolItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e){
+                EventQueue.invokeLater(new Runnable() {
+                    public void run() {
+                        try {
+                            CompareWindow window = new CompareWindow("Image comparison");
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
 
-        toolsMenu.add(zoomToolItem);
+            }
+        });
+        toolsMenu.add(compareToolItem);
         menuBar.add(toolsMenu);
 
         return menuBar;

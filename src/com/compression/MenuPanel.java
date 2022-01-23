@@ -51,7 +51,6 @@ public class MenuPanel extends JPanel implements ChangeListener {
         slider.setToolTipText("Move slider to select image quality after compression");
 
 
-
         DefaultComboBoxModel<CompressionType> compressionTypeComboModel = new DefaultComboBoxModel<>();
         compressionTypeComboModel.addElement(CompressionType.JPEG);
         compressionTypeComboModel.addElement(CompressionType.PNG);
