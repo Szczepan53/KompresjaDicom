@@ -67,7 +67,7 @@ public class MainFrame extends JFrame{
         });
 
         fileChooser.setFileFilter(new FileNameExtensionFilter("DICOM Files", "dcm"));
-        fileChooser.setCurrentDirectory(new File("dicom_files"));
+        fileChooser.setCurrentDirectory(new File("dicom_samples"));
         this.add(this.imagePanel, BorderLayout.CENTER);
 
         /* Inicjalizacja panelu sterowania (menuPanel) oraz tablicy atrybutów wczytanego pliku DICOM */
@@ -149,7 +149,6 @@ public class MainFrame extends JFrame{
         if(matchedFiles != null && matchedFiles.length > 0) {
            latestFile = Arrays.stream(matchedFiles)
                    .map((File file) -> file.getName().split("\\.")[0])
-                   .sorted().peek(System.out::println)
                    .max(Comparator.naturalOrder()).get();
         }
 
@@ -170,7 +169,6 @@ public class MainFrame extends JFrame{
             changedFormatLastPart = String.join(".", lastPart);
             newPath = dirPath + changedFormatLastPart;
         }
-        System.out.println(newPath);
 
         return newPath;
     }

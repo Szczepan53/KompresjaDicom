@@ -11,7 +11,7 @@ import java.io.IOException;
  */
 public class Main {
     //Ścieżka do pliku DICOM otwieranego przy uruchamianiu programu.
-    private static final String dicomFile = "dicom_files\\MammoTomoUPMC_Case1\\Case1 [Case1]\\Series 73200000 [MG - L MLO Breast Tomosynthesis Image].dcm";
+    private static final String dicomFile = "dicom_samples\\MRBRAIN.DCM";
 
     public static void main(String[] args) {
         //Uruchomienie programu w oddzielnym wątku.

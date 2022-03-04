@@ -126,7 +126,6 @@ public class ComparisonWindow extends JFrame{
      * @param img referencja do skalowanego obrazu
      */
     private void resizeImage(JLabel label, BufferedImage img) {
-        System.out.println(zoom);
         AffineTransform t = AffineTransform.getScaleInstance(zoom, zoom);
         BufferedImageOp resizeOp = new AffineTransformOp(t, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
         BufferedImage resizedImage = resizeOp.filter(img, null);
@@ -189,7 +188,6 @@ public class ComparisonWindow extends JFrame{
                                     "Cannot load file " + selectedFilePath,
                                     "Error loading image file",
                                     JOptionPane.ERROR_MESSAGE);
-                            ex.printStackTrace();
                         }
                         ComparisonWindow.this.fileChooser.setCurrentDirectory(path.getParentFile());
                     }
